@@ -1,4 +1,6 @@
 workspace
+.idea_modules
+.idea
 .vs
 obj
 bin
