@@ -14,27 +14,21 @@ object ConsoleMessages {
   case class InputSuccess(line: String)
   case class NullInputError(line: String)
   case class ValidationError(line: String)
+  val startCommand: String = "start"
+  val endCommand: String = "exit"
 }
 
 object ConsoleReaderActor {
-  def props(consoleWriter: ActorRef): Props = Props(new ConsoleReaderActor(consoleWriter))
-  val startCommand: String = "start"
+  def props(validationActor: ActorRef): Props = Props(new ConsoleReaderActor(validationActor))
 }
 
-class ConsoleReaderActor(consoleWriter: ActorRef) extends Actor with ActorLogging {
+class ConsoleReaderActor(validationActor: ActorRef) extends Actor with ActorLogging {
 
-  val endCommand: String = "exit"
   def receive = {
-    case ConsoleReaderActor.startCommand =>
+    case ConsoleMessages.startCommand =>
       println("Write whatever you want into the console!")
       println("Some entries will pass validation, and some won't...\n\n")
       println("Type 'exit' to quit this application at any time.\n")
-      loop
-    case ConsoleMessages.NullInputError(line) =>
-      consoleWriter ! ConsoleMessages.NullInputError(line)
-      loop
-    case ConsoleMessages.ValidationError(line) =>
-      consoleWriter ! ConsoleMessages.ValidationError(line)
       loop
     case msg => loop
 
@@ -45,21 +39,11 @@ class ConsoleReaderActor(consoleWriter: ActorRef) extends Actor with ActorLoggin
     processLine(scanner.nextLine())
   }
   private def processLine(line: String): Unit = {
-    if (noMessage(line)) nullInputError
-    else if (end(line)) stop
-    else if (isValid(line)) printAndContinue
-    else validationError
+    if (end(line)) stop
+    else validationActor ! line
   }
   
-  private def validationError = self ! ConsoleMessages.ValidationError("Invalid: input had odd number of characters.")
-  private def nullInputError = self ! ConsoleMessages.NullInputError("No input received.")
   private def stop = context.stop(self)
-  private def printAndContinue: Unit = {
-    consoleWriter ! ConsoleMessages.InputSuccess("Thank you! Message was valid.")
-    self ! ConsoleMessages.ContinueProcessing
-  }
-  private def noMessage(line: String) = line.isEmpty()
-  private def end(line: String) = line.toLowerCase() == endCommand
-  private def isValid(line: String): Boolean = line.length() % 2 == 0
+  private def end(line: String) = !line.isEmpty() && line.toLowerCase() == ConsoleMessages.endCommand
 
 }

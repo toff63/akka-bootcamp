@@ -7,6 +7,8 @@ import akka.actor.Props
 import com.example.actors.ConsoleWriterActor
 import akka.dispatch.sysmsg.Terminate
 import akka.actor.Terminated
+import com.example.actors.ValidationActor
+import com.example.actors.ConsoleMessages
 
 /**
  * This is actually just a small wrapper around the generic launcher
@@ -33,11 +35,12 @@ object HelloSimpleMain {
 class ConsoleStartingActor extends Actor with ActorLogging {
 	override def preStart(): Unit = {
 			val writer = context.actorOf(ConsoleWriterActor.props, "writer")
-			val reader = context.actorOf(ConsoleReaderActor.props(writer))
-			reader ! ConsoleReaderActor.startCommand
+			val validation = context.actorOf(ValidationActor.props(writer), "validator")
+			val reader = context.actorOf(ConsoleReaderActor.props(validation), "reader")
+			reader ! ConsoleMessages.startCommand
 			context watch reader
-
 	}
+
 	def receive = {
 	  case Terminated(_) => context.stop(self)
 	}
