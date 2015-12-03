@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Akka.Actor;
 
 namespace WinTail
@@ -29,9 +30,8 @@ namespace WinTail
 
         private void DoPrintInstructions()
         {
-            Console.WriteLine("Write whatever you want into the console!");
-            Console.WriteLine("Some entries will pass validation, and some won't...\n\n");
-            Console.WriteLine("Type 'exit' to quit this application at any time.\n");
+            Console.WriteLine("Please provide the URI of a log file on disk.\n");
+            Console.WriteLine(string.Format("Like: {0}\n", Path.GetFullPath(".")));
         }
 
         /// <summary>
