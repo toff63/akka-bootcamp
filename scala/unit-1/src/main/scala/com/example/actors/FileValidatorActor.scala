@@ -9,11 +9,11 @@ import java.nio.file.FileSystems
 import akka.actor.Props
 
 object FileValidator {
-  def props(consoleWriter: ActorRef, tailCoordinator: ActorRef):Props = Props(new FileValidatorActor(consoleWriter, tailCoordinator))
+  def props(consoleWriter: ActorRef):Props = Props(new FileValidatorActor(consoleWriter))
 }
 
 
-class FileValidatorActor(consoleWriter: ActorRef, tailCoordinator: ActorRef) extends Actor with ActorLogging {
+class FileValidatorActor(consoleWriter: ActorRef) extends Actor with ActorLogging {
 
   def receive = {
     case line: String =>
@@ -27,7 +27,7 @@ class FileValidatorActor(consoleWriter: ActorRef, tailCoordinator: ActorRef) ext
   private def nullInputError = consoleWriter ! ConsoleMessages.NullInputError("No input received.")
   private def valid(file:String): Unit = {
     consoleWriter ! ConsoleMessages.InputSuccess(s"Starting to process $file")
-    tailCoordinator ! TailCoordinator.Messages.StartTail(file, consoleWriter)
+    context.actorSelection("akka://Main/user/app/tailCoordinator") ! TailCoordinator.Messages.StartTail(file, consoleWriter)
   }
   private def noMessage(line: String) = line.isEmpty()
   private def end(line: String) = line.toLowerCase() == ConsoleMessages.endCommand

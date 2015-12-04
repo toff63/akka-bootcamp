@@ -12,6 +12,9 @@ import com.example.actors.ConsoleMessages
 import com.example.actors.FileValidatorActor
 import com.example.actors.FileValidator
 import com.example.actors.TailCoordinator
+import akka.actor.ActorPath
+import akka.actor.Identify
+import akka.actor.ActorIdentity
 
 /**
  * This is actually just a small wrapper around the generic launcher
@@ -36,16 +39,17 @@ object HelloSimpleMain {
 }
 
 class ConsoleStartingActor extends Actor with ActorLogging {
-	override def preStart(): Unit = {
-			val writer = context.actorOf(ConsoleWriterActor.props, "writer")
-			val tailCoordinator = context.actorOf(Props(new TailCoordinator))
-			val validation = context.actorOf(FileValidator.props(writer, tailCoordinator), "validator")
-			val reader = context.actorOf(ConsoleReaderActor.props(validation), "reader")
-			reader ! ConsoleMessages.startCommand
-			context watch reader
-	}
+  override def preStart(): Unit = {
+    val writer = context.actorOf(ConsoleWriterActor.props, "writer")
+    val tailCoordinator = context.actorOf(Props(new TailCoordinator), "tailCoordinator")
+    val validation = context.actorOf(FileValidator.props(writer), "validator")
+    val reader = context.actorOf(ConsoleReaderActor.props(), "reader")
+    reader ! ConsoleMessages.startCommand
+    context watch reader
+  }
 
-	def receive = {
-	  case Terminated(_) => context.stop(self)
-	}
+  def receive = {
+    case Terminated(_) => context.stop(self)
+  }
 }
+

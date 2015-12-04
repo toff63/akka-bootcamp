@@ -7,6 +7,9 @@ import java.io.InputStreamReader
 import java.util.Scanner
 import akka.actor.ActorRef
 import akka.actor.Props
+import akka.actor.Identify
+import akka.actor.ActorIdentity
+import akka.actor.ActorPath
 
 object ConsoleMessages {
   case class Line(line: String)
@@ -19,10 +22,10 @@ object ConsoleMessages {
 }
 
 object ConsoleReaderActor {
-  def props(validationActor: ActorRef): Props = Props(new ConsoleReaderActor(validationActor))
+  def props(): Props = Props(new ConsoleReaderActor())
 }
 
-class ConsoleReaderActor(validationActor: ActorRef) extends Actor with ActorLogging {
+class ConsoleReaderActor() extends Actor with ActorLogging {
 
   def receive = {
     case ConsoleMessages.startCommand =>
@@ -39,7 +42,9 @@ class ConsoleReaderActor(validationActor: ActorRef) extends Actor with ActorLogg
   }
   private def processLine(line: String): Unit = {
     if (end(line)) stop
-    else validationActor ! line
+    else {
+      context.actorSelection("akka://Main/user/app/validator") ! line
+    }
   }
   
   private def stop = context.stop(self)
