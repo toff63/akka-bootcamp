@@ -12,12 +12,7 @@ namespace WinTail
     {
         public const string ExitCommand = "exit";
         public const string StartCommand = "start";
-        private IActorRef validationActor;
 
-        public ConsoleReaderActor(IActorRef consoleValidationActor)
-        {
-            validationActor = consoleValidationActor;
-        }
 
         protected override void OnReceive(object message)
         {
@@ -46,7 +41,7 @@ namespace WinTail
                 // shut down the entire actor system (allows the process to exit)
                 Context.System.Shutdown();
             }
-            validationActor.Tell(message);
+            Context.ActorSelection("akka://myActorSystem/user/validationActor").Tell(message);
         }
 
         private bool isEnd(String line)

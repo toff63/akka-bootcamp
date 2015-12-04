@@ -53,7 +53,6 @@
     <Compile Include="TailActor.cs" />
     <Compile Include="TailCoordinatiorActor.cs" />
     <Compile Include="FileValidatorActor.cs" />
-    <Compile Include="ValidationActor.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="ConsoleReaderActor.cs" />
     <Compile Include="ConsoleWriterActor.cs" />
