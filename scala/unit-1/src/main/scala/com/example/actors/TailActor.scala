@@ -9,6 +9,7 @@ import scala.collection.JavaConversions._
 import java.nio.file.FileSystems
 import java.nio.charset.Charset
 import java.util.UUID
+import akka.actor.TypedActor.PreStart
 
 object TailActor {
   object Messages {
@@ -23,8 +24,11 @@ object TailActor {
 class TailActor(reporterActor: ActorRef, filePath: String) extends Actor with ActorLogging {
 
   var numberOfReadLines: Int = 0
-  context.actorOf(FileObserver.props(self, filePath), "FileObserver-" + UUID.randomUUID().toString()) ! "start"
-  self ! TailActor.Messages.InitialRead
+
+  override def preStart(): Unit = {
+    context.actorOf(FileObserver.props(self, filePath), "FileObserver-" + UUID.randomUUID().toString()) ! "start"
+    self ! TailActor.Messages.InitialRead
+  }
 
   def receive = {
     case TailActor.Messages.InitialRead => read
@@ -34,7 +38,7 @@ class TailActor(reporterActor: ActorRef, filePath: String) extends Actor with Ac
   }
 
   private def read = {
-    val lines:Seq[String] = Files.readAllLines(FileSystems.getDefault().getPath(filePath), Charset.forName("UTF-8"))
+    val lines: Seq[String] = Files.readAllLines(FileSystems.getDefault().getPath(filePath), Charset.forName("UTF-8"))
     val text = lines.drop(numberOfReadLines).mkString("\n")
     numberOfReadLines = lines.size
     reporterActor ! text
