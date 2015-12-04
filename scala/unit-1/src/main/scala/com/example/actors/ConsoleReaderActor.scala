@@ -26,9 +26,8 @@ class ConsoleReaderActor(validationActor: ActorRef) extends Actor with ActorLogg
 
   def receive = {
     case ConsoleMessages.startCommand =>
-      println("Write whatever you want into the console!")
-      println("Some entries will pass validation, and some won't...\n\n")
-      println("Type 'exit' to quit this application at any time.\n")
+      println("Enter the URI of a file on your disk")
+      println("like " + new java.io.File(".").getAbsolutePath)
       loop
     case msg => loop
 

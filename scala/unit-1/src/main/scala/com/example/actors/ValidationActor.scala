@@ -18,6 +18,7 @@ class ValidationActor(consoleWriter: ActorRef) extends Actor with ActorLogging {
       else validationError
       sender ! ConsoleMessages.ContinueProcessing
   }
+  
   private def validationError = consoleWriter  ! ConsoleMessages.ValidationError("Invalid: input had odd number of characters.")
   private def nullInputError = consoleWriter ! ConsoleMessages.NullInputError("No input received.")
   private def valid: Unit = consoleWriter ! ConsoleMessages.InputSuccess("Thank you! Message was valid.")
