@@ -7,7 +7,6 @@ import akka.actor.Props
 import com.example.actors.ConsoleWriterActor
 import akka.dispatch.sysmsg.Terminate
 import akka.actor.Terminated
-import com.example.actors.ValidationActor
 import com.example.actors.ConsoleMessages
 import com.example.actors.FileValidatorActor
 import com.example.actors.FileValidator
