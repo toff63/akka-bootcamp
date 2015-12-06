@@ -16,7 +16,8 @@ class Main extends JFXApp {
   val chart = ObservableBuffer[javafx.scene.chart.XYChart.Series[Number, Number]]()
   stage = new JFXApp.PrimaryStage {
     title.value = "Line Chart Sample"
-
+    height = 600
+    width = 800 
     scene = new Scene {
       root = new LineChart(NumberAxis("Number of Month"), NumberAxis("")) {
         title = "Stock Monitoring, 2010"
@@ -26,7 +27,7 @@ class Main extends JFXApp {
     }
   }
 
-  val chartActor = MonitoringMain.system.actorOf(ChartActor.props(chart))
+  val chartActor = MonitoringMain.system.actorOf(ChartActor.props(chart), "charting")
   chartActor ! ChartActor.Messages.InitializeChart(ChartDataHelper("FakeSeries-" + counter.incrementAndGet()))
 }
 
