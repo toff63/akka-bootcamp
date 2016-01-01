@@ -13,6 +13,7 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorRef
 import akka.event.LoggingReceive
 import java.util.UUID
+import akka.actor.PoisonPill
 
 object WebServiceClient {
   case class RetrieveRemoteData(req: String)
@@ -68,7 +69,7 @@ class FutureHandling extends Actor with ActorLogging {
   
   def sendResponseAndshutdown(originalSender: ActorRef, msg: Any) = {
     originalSender ! msg
-    if (context != null) context.stop(self)
+    self ! PoisonPill
   }
 
   def callRemoteServer(request: String): Future[String] = Future {
