@@ -1,3 +1,5 @@
+package sample.stream
+
 import akka.stream._
 import akka.stream.scaladsl._
 import akka.actor.ActorSystem
