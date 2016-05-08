@@ -12,41 +12,15 @@ import scala.concurrent.duration._
 import java.util.Calendar
 import java.io.File
 
-object TweetAnalyzer extends App {
+object GraphFlow extends App {
 
   implicit val system = ActorSystem("TweetAnalyzer")
   implicit val materializer = ActorMaterializer()
   implicit val executor: ExecutionContext = system.dispatcher
 
-  val authorStream: Future[Done] = AuthorSource.authors.runWith(Sink.foreach(println))
-  val hashtagsStream: Future[Done] = HashtagSource.hashtags.runWith(Sink.foreach(println))
-  val persistentStream: Future[Seq[IOResult]] = Future.sequence(PersistentSink.graph.run())
-
-  Await.result(Future.sequence(Seq[Future[Object]](authorStream, hashtagsStream, persistentStream)), 5 seconds)
+  Await.result(Future.sequence(PersistentSink.graph.run()), 5 seconds)
   system.terminate()
 
-}
-
-object TweetSource {
-  val tweets: Source[Tweet, NotUsed] = Source {
-    List[Tweet](
-      Tweet(Author("Allen"), Calendar.getInstance().getTimeInMillis(), "Lagom is powered by #akka"),
-      Tweet(Author("Christophe"), Calendar.getInstance().getTimeInMillis(), "Having fun with #akka #stream"),
-      Tweet(Author("Bob"), Calendar.getInstance().getTimeInMillis(), "Enjoying a #sunny day")
-    )
-  }
-}
-
-object AuthorSource {
-  val akka: Hashtag = Hashtag("#akka")
-  val authors: Source[Author, NotUsed] =
-    TweetSource.tweets
-      .filter(_.hashtags.contains(akka))
-      .map(_.author)
-}
-
-object HashtagSource {
-  val hashtags: Source[Hashtag, NotUsed] = TweetSource.tweets.mapConcat(_.hashtags.toList)
 }
 
 object PersistentSink {
@@ -71,3 +45,4 @@ object PersistentSink {
 
   def fullName(fileName: String): String = new File(".").getAbsolutePath() + s"/${fileName}.txt"
 }
+
